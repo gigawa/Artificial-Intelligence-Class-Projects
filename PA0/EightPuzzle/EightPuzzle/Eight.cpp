@@ -1,23 +1,29 @@
 #include <stdio.h>
 #include <iostream>
+#include <algorithm>
 #include <set>
 #include <queue>
+#include <string>
 
 using namespace std;
 
 //The 2D board for our 8-puzzle in format board[x][y]
 int** board;
+int** currentBoard;
 //The output logging file. Don't worry about this one
 FILE* output;
 
 struct node {
 	int** board;
 	int g;
+	int h;
 	int f;
+	node * parent;
 	vector<node> children;
+	string direction;
 
 	bool operator<(const node &rhs) const {
-		return !(f < rhs.f);
+		return (f > rhs.f);
 	}
 };
 
@@ -25,6 +31,19 @@ struct position {
 	int a;
 	int b;
 };
+
+bool CheckBoard(node node1) {
+	bool same = true;
+	for(int i = 0; i < 3; i++) {
+		for(int j = 0; j < 3; j++) {
+			if(node1.board[i][j] != currentBoard[i][j]) {
+				same = false;
+			}
+		}
+	}
+	cout << "Is Same: " << same << endl;
+	return same;
+}
 
 /*
 ReadBoardFile: Read board data in from a file to populate our board structure.
@@ -93,6 +112,11 @@ void LogCell(int x, int y)
 {
 	printf("(%d, %d): %d\n", x, y, board[x][y]);
 	fprintf(output, "(%d, %d): %d\n", x, y, board[x][y]);
+}
+
+void LogDirection(string direction) {
+	printf("%s\n", direction.c_str());
+	fprintf(output, "%s\n", direction.c_str());
 }
 
 /*
@@ -252,32 +276,40 @@ vector<node> CreateChildren(node current, int g) {
 		node left;
 		left.board = copyBoard(current.board);
 		left.board = moveLeft(left.board);
-		left.f = heuristic(left.board) + g;
+		left.h = heuristic(left.board);
 		left.g = g++;
+		left.f = left.h + left.g;
+		left.direction = "Left";
 		children.push_back(left);
 	}
 	if(blankPosition.a < 2) {
 		node right;
 		right.board = copyBoard(current.board);
 		right.board = moveRight(right.board);
-		right.f = heuristic(right.board) + g;
+		right.h = heuristic(right.board);
 		right.g = g++;
+		right.f = right.h + right.g;
+		right.direction = "Right";
 		children.push_back(right);
 	}
 	if(blankPosition.b > 0) {
 		node up;
 		up.board = copyBoard(current.board);
 		up.board = moveUp(up.board);
-		up.f = heuristic(up.board) + g;
+		up.h = heuristic(up.board);
 		up.g = g++;
+		up.f = up.h + up.g;
+		up.direction = "Up";
 		children.push_back(up);
 	}
 	if(blankPosition.b < 2) {
 		node down;
 		down.board = copyBoard(current.board);
 		down.board = moveDown(down.board);
-		down.f = heuristic(down.board) + g;
+		down.h = heuristic(down.board);
 		down.g = g++;
+		down.f = down.h + down.g;
+		down.direction = "Down";
 		children.push_back(down);
 	}
 	return children;
@@ -291,35 +323,31 @@ bool solve() {
 	node start;
 	start.board = board;
 	start.g = 0;
-	start.f = 0
+	start.f = heuristic(start.board);
 	frontier.push(start);
 	inFrontier.insert(start);
 
-	//while(frontier.size() > 0) {
-	for(int k = 0; k < 10; k++) {
+	while(frontier.size() > 0) {
 		node current = frontier.top();
-		cout << endl << "Current Board:";
-		printBoard(current.board);
+
+		if(current.direction != "") {
+			LogDirection(current.direction);
+		}
+
 		frontier.pop();
-		inFrontier.erase(current);
 		if(GoalTest(current.board)){
 			return true;
 		}
 		explored.insert(current);
-		if(current.children.size() == 0) {
-			current.children = CreateChildren(current, current.g);
-		}
+		current.children = CreateChildren(current, current.g);
+
 		for(int i = 0; i < current.children.size(); i++) {
 			frontier.push(current.children[i]);
-			cout << endl << "Child:";
-			printBoard(current.children[i].board);
-			cout << "F: " << current.children[i].f << endl;
-			//node childInFrontier = inFrontier.find(current.children[i]);
-			if(explored.find(current.children[i]) == explored.end() && inFrontier.find(current.children[i]) == inFrontier.end()) {
+			currentBoard = current.children[i].board;
+			set<node>::iterator inExplored = explored.find(current.children[i]);
+			if(inExplored == explored.end()) {
 				frontier.push(current.children[i]);
-			}/*else if(!(childInFrontier == inFrontier.end()) && current.children[i].f > childInFrontier) {
-				childInFrontier = current.childrent[i];
-			}*/
+			}
 		}
 	}
 
