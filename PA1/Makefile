@@ -1,2 +1,2 @@
-all:
-	g++ -std=c++11 tictactoe.cpp -o tictactoe
+all: 
+	g++ -g tictactoe.cpp -o tictactoe -L -lpthread
