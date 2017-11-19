@@ -13,6 +13,11 @@ using namespace std;
 #define X -1
 #define O 1
 
+int playerTurn;
+
+int xCount = 0;
+int oCount = 0;
+
 struct Move {
 	int x;
 	int y;
@@ -20,6 +25,7 @@ struct Move {
 };
 
 int Won(int board[4][4][4]);
+
 
 /*
 	read_from_file: reads the board from a file
@@ -110,6 +116,8 @@ int main( int argc, char* argv[] )
 	//debug into
 	//printf( "finishing tictactoe\n");
 
+	cout << "Player Turn: " << playerTurn << endl;
+
 	cout << "Winner: " << Won(board) << endl;
 
 	print_move_to_screen( m );
@@ -170,14 +178,24 @@ int read_from_file( char* inputfilename, int board[][4][4] )
 				fscanf(ifile, " %c", &c );
 				switch( c )
 				{
-					case '.': board[i][j][k] = EMPTY; break;
-					case 'x': board[i][j][k] = X; break;
-					case 'o': board[i][j][k] = O; break;
-					default: board[i][j][k] = EMPTY; break;
+					case '.': board[i][j][k] = EMPTY;
+										break;
+					case 'x': board[i][j][k] = X;
+										xCount++;
+										break;
+					case 'o': board[i][j][k] = O;
+										oCount++;
+										break;
+					default: board[i][j][k] = EMPTY;
+										break;
 				}
 
 			}
 		}
+	}
+
+	if(oCount > xCount) {
+		playerTurn = X;
 	}
 
 	fclose( ifile );
