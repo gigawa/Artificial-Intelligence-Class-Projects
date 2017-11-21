@@ -16,13 +16,14 @@ import scipy.stats
 #	returns: [u sigma] updated state with estimate at time t
 
 def kf_update(u, sigma, z):
-	print(u)
 	deltaT = 1
 	F = np.matrix([[1, deltaT], [0, 1]])
-	sigmaX = sigma
+	print(sigma)
+	sigmaX = np.matrix([[100, 0], [0, 100]])
+	sigmaZ = np.matrix([[5, 0], [0, 5]])
 	H = np.matrix([[1, 0], [0,0]])
 	FsigmaFTS = np.dot(np.dot(F, sigma), F.T) + sigmaX
-	inverse = np.linalg.inv((np.dot((np.dot(H, FsigmaFTS)), H.T)) + sigma)
+	inverse = np.linalg.inv((np.dot((np.dot(H, FsigmaFTS)), H.T)) + sigmaZ)
 	first = np.dot(FsigmaFTS, H.T)
 	K = np.dot(first, inverse)
 	Fu = np.dot(F, u)
@@ -43,4 +44,13 @@ def kf_update(u, sigma, z):
 #	returns: [door_dist] updated door distribution
 
 def door_update(u, sigma, d, door_dist):
+
+	x = int (u[0]/100)
+	p = door_dist[x]
+	if d:
+		p = 0.5;
+	else:
+		p = 0.5;
+
+	door_dist[x] = p
 	return door_dist
