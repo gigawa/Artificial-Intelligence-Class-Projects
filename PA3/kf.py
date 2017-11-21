@@ -16,13 +16,22 @@ import scipy.stats
 #	returns: [u sigma] updated state with estimate at time t
 
 def kf_update(u, sigma, z):
-	print("U:")
 	print(u)
-	print("Sigma:")
-	print(sigma)
-	print("Z")
-	print(z)
-	return [u, sigma]
+	deltaT = 1
+	F = np.matrix([[1, deltaT], [0, 1]])
+	sigmaX = sigma
+	H = np.matrix([[1, 0], [0,0]])
+	FsigmaFTS = np.dot(np.dot(F, sigma), F.T) + sigmaX
+	inverse = np.linalg.inv((np.dot((np.dot(H, FsigmaFTS)), H.T)) + sigma)
+	first = np.dot(FsigmaFTS, H.T)
+	K = np.dot(first, inverse)
+	Fu = np.dot(F, u)
+	HFu = np.dot(H, Fu)
+	error = z - HFu
+	u2 = Fu + np.dot(K, error)
+	I = np.identity(2)
+	sigma2 = np.dot((I - np.dot(K, H)), FsigmaFTS)
+	return [u2, sigma2]
 
 
 # door_update: update estimate of door locations
