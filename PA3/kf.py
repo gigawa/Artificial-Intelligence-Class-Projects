@@ -18,8 +18,9 @@ import scipy.stats
 def kf_update(u, sigma, z):
 	deltaT = 1
 	F = np.matrix([[1, deltaT], [0, 1]])
-	print(sigma)
-	sigmaX = np.matrix([[100, 0], [0, 100]])
+	#print(sigma)
+	#sigmaX = np.matrix([[100, 0], [0, 100]])
+	sigmaX = sigma
 	sigmaZ = np.matrix([[5, 0], [0, 5]])
 	H = np.matrix([[1, 0], [0,0]])
 	FsigmaFTS = np.dot(np.dot(F, sigma), F.T) + sigmaX
@@ -48,9 +49,13 @@ def door_update(u, sigma, d, door_dist):
 	x = int (u[0]/100)
 	p = door_dist[x]
 	if d:
-		p = 0.5;
+		p += (p * 0.6);
+		if p > 1:
+			p = 0.99
 	else:
-		p = 0.5;
+		p -= (p * 0.2);
+		if p < 0:
+			p = 0.01
 
 	door_dist[x] = p
 	return door_dist
