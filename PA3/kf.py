@@ -18,9 +18,7 @@ import scipy.stats
 def kf_update(u, sigma, z):
 	deltaT = 1
 	F = np.matrix([[1, deltaT], [0, 1]])
-	#print(sigma)
-	#sigmaX = np.matrix([[100, 0], [0, 100]])
-	sigmaX = sigma
+	sigmaX = np.matrix([[100, 0], [0, 100]])
 	sigmaZ = np.matrix([[5, 0], [0, 5]])
 	H = np.matrix([[1, 0], [0,0]])
 	FsigmaFTS = np.dot(np.dot(F, sigma), F.T) + sigmaX
